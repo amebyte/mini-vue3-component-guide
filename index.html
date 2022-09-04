@@ -4,6 +4,11 @@
         <title>mini-vue-guide</title>
     </head>
     <body>
-        
+        <div id="app"></div>
+        <script type="module">
+            import { createApp } from './mini-vue.js';
+            import { App } from './App.js';
+            createApp(App).mount(document.querySelector("#app"));
+        </script>
     </body>
 </html>
