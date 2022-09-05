@@ -1,4 +1,4 @@
-import { proxyRefs, effect } from './node_modules/@vue/reactivity/dist/reactivity.esm-browser.js'
+import { proxyRefs, effect } from '../node_modules/@vue/reactivity/dist/reactivity.esm-browser.js'
 import { createVNode } from './vnode.js'
 function createRenderer(options) {
     const {

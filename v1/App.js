@@ -1,4 +1,4 @@
-import { ref } from './node_modules/@vue/reactivity/dist/reactivity.esm-browser.js'
+import { ref } from '../node_modules/@vue/reactivity/dist/reactivity.esm-browser.js'
 import { createVNode } from './vnode.js'
 import { Component } from './Component.js'
 export const App = {
