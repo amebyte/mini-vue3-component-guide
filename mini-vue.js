@@ -1,3 +1,4 @@
+import { proxyRefs, effect } from './node_modules/@vue/reactivity/dist/reactivity.esm-browser.js'
 import { createVNode } from './vnode.js'
 function createRenderer(options) {
     const {
@@ -31,11 +32,39 @@ function createRenderer(options) {
         // 定义组件实例，一个组件实例本质上就是一个对象，它包含与组件有关的状态信息
         const instance = {
             vnode,
+            type: vnode.type,
             setupState: null, // 组件自身的状态数据，即 setup 的返回值
             isMounted: false, // 用来表示组件是否已经被挂载，初始值为 false
-            subTree: null // 组件所渲染的内容，即子树 (subTree)
+            subTree: null, // 组件所渲染的内容，即子树 (subTree)
+            update: null,
+            render: null,
+            proxy: null,
         }
         vnode.component = instance
+        const { setup, render } = instance.type
+        const setupResult = setup()
+        if(typeof setupResult === 'object') {
+            instance.setupState = proxyRefs(setupResult)
+        }
+        instance.proxy = new Proxy({ _:instance }, {
+            get({ _: instance}, key) {
+                
+            }
+        })
+        instance.render = render
+
+        instance.update = effect(() => {
+            // 如果 isMounted 为 false 则是组件挂载阶段
+            if(!instance.isMounted) {
+                const subTree = instance.subTree = instance.render.call(instance.proxy)
+                patch(null, subTree, container, instance, anchor)
+                instance.vnode.el = subTree.el
+                instance.isMounted = true
+            } else {
+                // 组件更新阶段
+            }
+        })
+
     }
 
     return {
