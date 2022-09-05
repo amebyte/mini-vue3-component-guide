@@ -1,5 +1,9 @@
 import { proxyRefs, effect } from '../node_modules/@vue/reactivity/dist/reactivity.esm-browser.js'
 import { createVNode } from './vnode.js'
+
+export let currentInstance = null
+export let currentRenderingInstance = null
+
 function createRenderer(options) {
     const {
         createElement: hostCreateElement,
@@ -45,7 +49,11 @@ function createRenderer(options) {
         }
         vnode.component = instance
         const { setup, render } = instance.type
+
+        setCurrentInstance(instance)
         const setupResult = setup()
+        setCurrentInstance(instance)
+
         if(typeof setupResult === 'object') {
             instance.setupState = proxyRefs(setupResult)
         }
@@ -61,7 +69,7 @@ function createRenderer(options) {
         instance.update = effect(() => {
             // 如果 isMounted 为 false 则是组件挂载阶段
             if(!instance.isMounted) {
-                const subTree = instance.subTree = instance.render.call(instance.proxy)
+                const subTree = (instance.subTree = renderComponentRoot(instance))
                 patch(null, subTree, container)
                 instance.vnode.el = subTree.el
                 instance.isMounted = true
@@ -95,15 +103,72 @@ function createRenderer(options) {
     }
 }
 
+function setCurrentInstance(instance) {
+    currentInstance = instance
+}
+
+function renderComponentRoot(
+    instance
+  ) {
+    const { proxy, render } = instance
+    let result
+    // 返回上一个实例对象
+    const prev = setCurrentRenderingInstance(instance)
+    result = render.call(proxy)
+    // 再设置当前的渲染对象上一个，具体场景是嵌套循环渲染的时候，渲染完子组件，再去渲染父组件
+    setCurrentRenderingInstance(prev)
+    return result
+}
+
+function setCurrentRenderingInstance(instance) {
+    const prev = currentRenderingInstance
+    currentRenderingInstance = instance
+    return prev
+}
+
 function createAppAPI(render) {
     return function createApp(rootComponent) {
-        return {
+        const context = createAppContext()
+        const installedPlugins = new Set()
+        const app = (context.app = {
+            use(plugin, ...options) {
+                if (installedPlugins.has(plugin)) {
+                  console.warn(`Plugin has already been applied to target app.`)
+                } else if (plugin && isFunction(plugin.install)) {
+                  installedPlugins.add(plugin)
+                  plugin.install(app, ...options)
+                } else if (isFunction(plugin)) {
+                  installedPlugins.add(plugin)
+                  plugin(app, ...options)
+                }
+                return app
+            },
+            component(name, component) {
+                if (!component) {
+                  return context.components[name]
+                }
+                context.components[name] = component
+                return app
+            },
             mount(rootContainer) {
                 const vnode = createVNode(rootComponent)
+                vnode.appContext = context
                 render(vnode, rootContainer)
             }
-        }
+        })
+        return app
     }
+}
+
+function createAppContext() {
+    return {
+        app: null,
+        config: {},
+        mixins: [],
+        components: {},
+        directives: {},
+        provides: Object.create(null),
+      }
 }
 
 function createElement(type) {
