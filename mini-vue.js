@@ -4,8 +4,6 @@ function createRenderer(options) {
     const {
         createElement: hostCreateElement,
         insert: hostInsert,
-        remove: hostRemove,
-        setElementText: hostSetElementText
     } = options
 
     function render(vnode, container) {
@@ -14,9 +12,14 @@ function createRenderer(options) {
 
     function patch(n1, n2, container, parentComponent, anchor) {
         const { type } = n2
-        console.log('type', type)
         if(typeof type === 'string') {
             // 作为普通元素进行处理
+            if (!n1) {
+                // 创建节点
+                mountElement(n2, container, parentComponent, anchor)
+            } else {
+                // 更新节点
+            }
         } else if(typeof type === 'object') {
             // 如果是 type 是对象，那么就作为组件进行处理
             if(!n1) {
@@ -48,7 +51,9 @@ function createRenderer(options) {
         }
         instance.proxy = new Proxy({ _:instance }, {
             get({ _: instance}, key) {
-                
+                if(key in instance.setupState) {
+                    return instance.setupState[key]
+                }
             }
         })
         instance.render = render
@@ -65,6 +70,13 @@ function createRenderer(options) {
             }
         })
 
+    }
+
+    function mountElement(vnode, container, parentComponent, anchor) {
+        const el = (vnode.el = hostCreateElement(vnode.type))
+        const { children } = vnode
+        el.textContent = children
+        hostInsert(el, container, anchor)
     }
 
     return {
@@ -91,22 +103,9 @@ function insert(child, parent, anchor) {
     parent.insertBefore(child, anchor || null)
 }
 
-function remove(child) {
-    const parent = child.parentNode 
-    if(parent) {
-        parent.removeChild(child)
-    }
-}
-
-function setElementText(el, text) {
-    el.textContent = text
-}
-
 const renderer = createRenderer({
     createElement,
     insert,
-    remove,
-    setElementText
 })
 
 export function createApp(...args) {
