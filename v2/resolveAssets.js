@@ -17,7 +17,7 @@ function resolveAsset(type, name) {
            return Component
         }
       }
-
+      console.log('instance.appContext', instance.appContext)
       const res =
       // 局部注册
       resolve(Component[type], name) ||
