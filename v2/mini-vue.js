@@ -7,7 +7,7 @@ export let currentRenderingInstance = null
 
 // 创建渲染器
 function createRenderer(options) {
-    // 把参数进行解构进行重命名，方便区分理解
+    // 把参数进行解构进行重命名，方便区分理解                       
     const {
         createElement: hostCreateElement,
         insert: hostInsert,
@@ -56,6 +56,7 @@ function createRenderer(options) {
             render: null, // 组件渲染函数
             proxy: null, // 组件代理对象
         }
+        // 将组件实例设置到 vnode 上，用于后续更新
         vnode.component = instance
         const { setup, render } = instance.type
         // 设置当前的组件实例
