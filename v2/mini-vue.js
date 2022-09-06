@@ -61,7 +61,7 @@ function createRenderer(options) {
         // 设置当前的组件实例
         setCurrentInstance(instance)
         const setupResult = setup()
-        // 设置当前组件当前组件实例为空
+        // 设置当前组件当前组件实例为空, 具体场景是嵌套循环渲染的时候，渲染完子组件，再去渲染父组件
         setCurrentInstance(null)
 
         if(typeof setupResult === 'object') {
@@ -69,6 +69,7 @@ function createRenderer(options) {
             // proxyRefs 转换 ref 类型省去 .value 繁琐操作
             instance.setupState = proxyRefs(setupResult)
         }
+        // render 函数中的 this 代理对象，通过 call 方法设置 render 函数中的 this 指向此 Proxy 代理对象
         instance.proxy = new Proxy({ _:instance }, {
             get({ _: instance}, key) {
                 if(key in instance.setupState) {
@@ -76,14 +77,17 @@ function createRenderer(options) {
                 }
             }
         })
+        // 把组件对象上的 render 函数赋值给组件实例的 render 属性
         instance.render = render
 
         instance.update = effect(() => {
             // 如果 isMounted 为 false 则是组件挂载阶段
             if(!instance.isMounted) {
+                // 通过组件的实例的 render 函数生成成子树
                 const subTree = (instance.subTree = renderComponentRoot(instance))
                 patch(null, subTree, container, instance)
                 instance.vnode.el = subTree.el
+                // 表示组件挂载完成
                 instance.isMounted = true
             } else {
                 // 组件更新阶段
@@ -114,7 +118,7 @@ function createRenderer(options) {
         createApp: createAppAPI(render)
     }
 }
-
+// 设置当前的组件实例
 function setCurrentInstance(instance) {
     currentInstance = instance
 }
@@ -131,7 +135,7 @@ function renderComponentRoot(
     setCurrentRenderingInstance(prev)
     return result
 }
-
+// 设置正在渲染的组件实例
 function setCurrentRenderingInstance(instance) {
     const prev = currentRenderingInstance
     currentRenderingInstance = instance
