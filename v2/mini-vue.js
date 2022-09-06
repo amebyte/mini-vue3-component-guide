@@ -1,19 +1,22 @@
 import { proxyRefs, effect } from '../node_modules/@vue/reactivity/dist/reactivity.esm-browser.js'
 import { createVNode } from './vnode.js'
-
+// 当前运行的组件实例
 export let currentInstance = null
+// 当前运行的渲染组件实例
 export let currentRenderingInstance = null
 
+// 创建渲染器
 function createRenderer(options) {
+    // 把参数进行解构进行重命名，方便区分理解
     const {
         createElement: hostCreateElement,
         insert: hostInsert,
     } = options
-
+    // 渲染函数，主要是把一个虚拟 DOM 渲染到某一个元素节点上
     function render(vnode, container, parentComponent) {
         patch(null, vnode, container, parentComponent)
     }
-
+    // 补丁函数
     function patch(n1, n2, container, parentComponent) {
         const { type } = n2
         if(typeof type === 'string') {
@@ -34,10 +37,11 @@ function createRenderer(options) {
             }
         }
     }
-
+    // 初始化一个组件的上下文内容
     const emptyAppContext = createAppContext()
 
     function mountComponent(vnode, container, parent) {
+        // 组件上下文继承父组件的上下文或者虚拟DOM 的上下文，如果都不存在则创建一个空的上下文
         const appContext =
               (parent ? parent.appContext : vnode.appContext) || emptyAppContext
         // 定义组件实例，一个组件实例本质上就是一个对象，它包含与组件有关的状态信息
@@ -54,12 +58,15 @@ function createRenderer(options) {
         }
         vnode.component = instance
         const { setup, render } = instance.type
-
+        // 设置当前的组件实例
         setCurrentInstance(instance)
         const setupResult = setup()
-        setCurrentInstance(instance)
+        // 设置当前组件当前组件实例为空
+        setCurrentInstance(null)
 
         if(typeof setupResult === 'object') {
+            // 如果组件的 setup 方法返回的是一个对象，则通过 proxyRefs 方法处理之后设置到 instance 的 setupState 属性上
+            // proxyRefs 转换 ref 类型省去 .value 繁琐操作
             instance.setupState = proxyRefs(setupResult)
         }
         instance.proxy = new Proxy({ _:instance }, {
@@ -164,7 +171,7 @@ function createAppAPI(render) {
         return app
     }
 }
-
+// 当前组件上下文对象，其中包含config，app等
 function createAppContext() {
     return {
         app: null,
