@@ -76,7 +76,6 @@ function createRenderer(options) {
                 // 组件更新阶段
             }
         })
-
     }
 
     function mountElement(vnode, container) {
@@ -130,13 +129,13 @@ function insert(child, parent, anchor) {
 function setElementText (el, text) {
     el.textContent = text
 }
-
+// 创建渲染器
 const renderer = createRenderer({
     createElement,
     insert,
     setElementText
 })
-// 创建渲染器
+// 创建 Vue3 应用
 export function createApp(...args) {
     return renderer.createApp(...args)
 }
