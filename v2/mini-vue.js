@@ -7,10 +7,11 @@ export let currentRenderingInstance = null
 
 // 创建渲染器
 function createRenderer(options) {
-    // 把参数进行解构进行重命名，方便区分理解                       
+    // 把参数进行解构进行重命名，方便区分理解
     const {
         createElement: hostCreateElement,
         insert: hostInsert,
+        setElementText: hostSetElementText
     } = options
     // 渲染函数，主要是把一个虚拟 DOM 渲染到某一个元素节点上
     function render(vnode, container, parentComponent) {
@@ -56,7 +57,6 @@ function createRenderer(options) {
             render: null, // 组件渲染函数
             proxy: null, // 组件代理对象
         }
-        // 将组件实例设置到 vnode 上，用于后续更新
         vnode.component = instance
         const { setup, render } = instance.type
         // 设置当前的组件实例
@@ -96,21 +96,25 @@ function createRenderer(options) {
         })
 
     }
-
+    // 具体怎么把虚拟DOM 渲染成真实DOM 的
     function mountElement(vnode, container, parentComponent) {
+        // 创建一个 element 元素
         const el = (vnode.el = hostCreateElement(vnode.type))
         const { children } = vnode
         if(typeof children === 'string') {
-            el.textContent = children
+            // 子节点是字符串，则进行文本创建
+            hostSetElementText(el, children)
         } else if(Array.isArray(children)) {
+            // 子节点是数组，那么继续循环创建
             mountChildren(children, container, parentComponent)
         }
         
         hostInsert(el, container)
     }
-
+    // 循环创建子节点
     function mountChildren(children, container, parentComponent) {
         children.forEach((v) => {
+          // 继续通过 patch 函数进行渲染对应的 vnode
           patch(null, v, container, parentComponent)
         })
     }
@@ -185,20 +189,25 @@ function createAppContext() {
         components: {},
         directives: {},
         provides: Object.create(null),
-      }
+    }
 }
-
+// 创建元素
 function createElement(type) {
     return document.createElement(type)
 }
-
+// 插入元素
 function insert(child, parent, anchor) {
     parent.insertBefore(child, anchor || null)
 }
-
+// 创建元素文本
+function setElementText (el, text) {
+    el.textContent = text
+}
+// 创建渲染器
 const renderer = createRenderer({
     createElement,
     insert,
+    setElementText
 })
 
 export function createApp(...args) {

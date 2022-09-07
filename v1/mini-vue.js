@@ -2,15 +2,17 @@ import { proxyRefs, effect } from '../node_modules/@vue/reactivity/dist/reactivi
 import { createVNode } from './vnode.js'
 // 创建渲染器
 function createRenderer(options) {
+    // 把参数进行解构进行重命名，方便区分理解
     const {
         createElement: hostCreateElement,
         insert: hostInsert,
+        setElementText: hostSetElementText
     } = options
-
+    // 渲染函数，主要是把一个虚拟 DOM 渲染到某一个元素节点上
     function render(vnode, container) {
         patch(null, vnode, container, null, null)
     }
-
+    // 补丁函数
     function patch(n1, n2, container) {
         const { type } = n2
         if(typeof type === 'string') {
@@ -77,7 +79,7 @@ function createRenderer(options) {
         const el = (vnode.el = hostCreateElement(vnode.type))
         const { children } = vnode
         if(typeof children === 'string') {
-            el.textContent = children
+            hostSetElementText(el, children)
         } else if(Array.isArray(children)) {
             mountChildren(children, container)
         }
@@ -106,20 +108,26 @@ function createAppAPI(render) {
         }
     }
 }
-
+// 创建元素
 function createElement(type) {
     return document.createElement(type)
 }
-
+// 插入元素
 function insert(child, parent, anchor) {
     parent.insertBefore(child, anchor || null)
+}
+
+// 创建元素文本
+function setElementText (el, text) {
+    el.textContent = text
 }
 
 const renderer = createRenderer({
     createElement,
     insert,
+    setElementText
 })
-
+// 创建渲染器
 export function createApp(...args) {
     return renderer.createApp(...args)
 }
