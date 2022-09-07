@@ -104,25 +104,27 @@ function createRenderer(options) {
         })
 
     }
-    // 具体怎么把虚拟DOM 渲染成真实DOM 的
+    // 具体怎么把虚拟DOM 渲染成真实DOM 
     function mountElement(vnode, container, parentComponent) {
-        // 创建一个 element 元素
+        // 使用 vnode.type 作为标签名称创建 DOM 元素
         const el = (vnode.el = hostCreateElement(vnode.type))
+        // 获取 children 内容
         const { children } = vnode
         if(typeof children === 'string') {
-            // 子节点是字符串，则进行文本创建
+            // 如果 children 是字符串，则说明它是元素的文本节点
             hostSetElementText(el, children)
         } else if(Array.isArray(children)) {
-            // 子节点是数组，那么继续循环创建
+            // 子节点是数组，那么调用 mountChildren 进行创建
             mountChildren(children, container, parentComponent)
         }
-        
+        // 将元素插入到挂载点下
         hostInsert(el, container)
     }
     // 循环创建子节点
     function mountChildren(children, container, parentComponent) {
+        // 如果是子节点是数组则进行循环创建
         children.forEach((v) => {
-          // 继续通过 patch 函数进行渲染对应的 vnode
+          // 递归调用 patch 函数渲染子节点
           patch(null, v, container, parentComponent)
         })
     }

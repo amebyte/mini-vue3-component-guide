@@ -87,21 +87,27 @@ function createRenderer(options) {
             }
         })
     }
-
+    // 具体怎么把虚拟DOM 渲染成真实DOM 
     function mountElement(vnode, container) {
+        // 使用 vnode.type 作为标签名称创建 DOM 元素
         const el = (vnode.el = hostCreateElement(vnode.type))
+        // 获取 children 内容
         const { children } = vnode
         if(typeof children === 'string') {
+            // 如果 children 是字符串，则说明它是元素的文本节点
             hostSetElementText(el, children)
         } else if(Array.isArray(children)) {
+            // 子节点是数组，那么调用 mountChildren 进行创建
             mountChildren(children, container)
         }
-        
+        // 将元素插入到挂载点下
         hostInsert(el, container)
     }
-
+    // 循环创建子节点
     function mountChildren(children, container) {
+        // 如果是子节点是数组则进行循环创建
         children.forEach((v) => {
+          // 递归调用 patch 函数渲染子节点
           patch(null, v, container)
         })
     }
@@ -135,7 +141,7 @@ function insert(child, parent, anchor) {
     parent.insertBefore(child, anchor || null)
 }
 
-// 创建元素文本
+// 创建元素文本节点
 function setElementText (el, text) {
     el.textContent = text
 }
