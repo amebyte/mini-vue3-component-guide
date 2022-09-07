@@ -48,6 +48,7 @@ function createRenderer(options) {
         }
         vnode.component = instance
         const { setup, render } = instance.type
+        // 运行组件对象的 setup 方法，获取返回结果
         const setupResult = setup()
         if(typeof setupResult === 'object') {
             // 如果组件的 setup 方法返回的是一个对象，则通过 proxyRefs 方法处理之后设置到 instance 的 setupState 属性上
@@ -56,7 +57,7 @@ function createRenderer(options) {
         } else {
             // 返回的值还有可能是函数，这里不作展开分析了
         }
-        // render 函数中的 this 代理对象，通过 call 方法设置 render 函数中的 this 指向此 Proxy 代理对象
+        // 设置 render 函数中的 this 代理对象，通过 call 方法设置 render 函数中的 this 指向此 Proxy 代理对象
         instance.proxy = new Proxy({ _:instance }, {
             get({ _: instance}, key) {
                 if(key in instance.setupState) {

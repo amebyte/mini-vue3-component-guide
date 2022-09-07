@@ -61,6 +61,7 @@ function createRenderer(options) {
         const { setup, render } = instance.type
         // 设置当前的组件实例
         setCurrentInstance(instance)
+        // 运行组件对象的 setup 方法，获取返回结果
         const setupResult = setup()
         // 设置当前组件当前组件实例为空, 具体场景是嵌套循环渲染的时候，渲染完子组件，再去渲染父组件
         setCurrentInstance(null)
@@ -72,7 +73,7 @@ function createRenderer(options) {
         } else {
             // 返回的值还有可能是函数，这里不作展开分析了
         }
-        // render 函数中的 this 代理对象，通过 call 方法设置 render 函数中的 this 指向此 Proxy 代理对象
+        // 设置 render 函数中的 this 代理对象，通过 call 方法设置 render 函数中的 this 指向此 Proxy 代理对象
         instance.proxy = new Proxy({ _:instance }, {
             get({ _: instance}, key) {
                 if(key in instance.setupState) {
