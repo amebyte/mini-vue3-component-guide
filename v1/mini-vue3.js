@@ -46,6 +46,7 @@ function createRenderer(options) {
             render: null, // 组件渲染函数
             proxy: null, // 组件代理对象
         }
+        // 将组件实例设置到 vnode 上，用于后续更新
         vnode.component = instance
         const { setup, render } = instance.type
         // 运行组件对象的 setup 方法，获取返回结果
