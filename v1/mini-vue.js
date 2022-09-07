@@ -33,7 +33,7 @@ function createRenderer(options) {
             }
         }
     }
-
+    // 组件挂载
     function mountComponent(vnode, container) {
         // 定义组件实例，一个组件实例本质上就是一个对象，它包含与组件有关的状态信息
         const instance = {
@@ -56,21 +56,29 @@ function createRenderer(options) {
         } else {
             // 返回的值还有可能是函数，这里不作展开分析了
         }
+        // render 函数中的 this 代理对象，通过 call 方法设置 render 函数中的 this 指向此 Proxy 代理对象
         instance.proxy = new Proxy({ _:instance }, {
             get({ _: instance}, key) {
                 if(key in instance.setupState) {
+                    // 如果获取的 key 存在 instance.setupState 上则返回 instance.setupState 对应的值
                     return instance.setupState[key]
                 }
+                // 其他可以是 props, slots 等
             }
         })
+        // 把组件对象上的 render 函数赋值给组件实例的 render 属性
         instance.render = render
-
+        // effect 函数会返回一个 runner 函数，把返回的 runner 函数设置到组件实例对象上 update 属性上，后续更新则可以直接调用组件实例上的 update 方法了
         instance.update = effect(() => {
             // 如果 isMounted 为 false 则是组件挂载阶段
             if(!instance.isMounted) {
-                const subTree = instance.subTree = instance.render.call(instance.proxy)
+                // 通过组件的实例的 render 函数生成子树
+                const subTree = (instance.subTree = instance.render.call(instance.proxy))
+                // 把虚拟DOM 渲染到对应的节点上
                 patch(null, subTree, container)
+                // 把生成的真实DOM 设置到虚拟DOM 的真实DOM 属性 el 上，后续如果没有变化，则不需要再次生成
                 instance.vnode.el = subTree.el
+                // 表示组件挂载完成
                 instance.isMounted = true
             } else {
                 // 组件更新阶段
