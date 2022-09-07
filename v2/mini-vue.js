@@ -69,6 +69,8 @@ function createRenderer(options) {
             // 如果组件的 setup 方法返回的是一个对象，则通过 proxyRefs 方法处理之后设置到 instance 的 setupState 属性上
             // proxyRefs 转换 ref 类型省去 .value 繁琐操作
             instance.setupState = proxyRefs(setupResult)
+        } else {
+            // 返回的值还有可能是函数，这里不作展开分析了
         }
         // render 函数中的 this 代理对象，通过 call 方法设置 render 函数中的 this 指向此 Proxy 代理对象
         instance.proxy = new Proxy({ _:instance }, {
@@ -118,7 +120,7 @@ function createRenderer(options) {
           patch(null, v, container, parentComponent)
         })
     }
-
+    // 返回渲染器对象
     return {
         createApp: createAppAPI(render)
     }
@@ -146,11 +148,12 @@ function setCurrentRenderingInstance(instance) {
     currentRenderingInstance = instance
     return prev
 }
-
+// 创建 Vue3 应用实例
 function createAppAPI(render) {
     return function createApp(rootComponent) {
         const context = createAppContext()
         const installedPlugins = new Set()
+        // 创建 Vue3 应用实例
         const app = (context.app = {
             use(plugin, ...options) {
                 if (installedPlugins.has(plugin)) {
@@ -171,9 +174,12 @@ function createAppAPI(render) {
                 context.components[name] = component
                 return app
             },
+            // 实例挂载方法
             mount(rootContainer) {
+                // 创建根组件虚拟DOM
                 const vnode = createVNode(rootComponent)
                 vnode.appContext = context
+                // 把根组件的虚拟DOM 渲染到 #app 节点上
                 render(vnode, rootContainer)
             }
         })
