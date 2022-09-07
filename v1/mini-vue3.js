@@ -39,12 +39,12 @@ function createRenderer(options) {
         const instance = {
             vnode,
             type: vnode.type,
-            setupState: null, // 组件自身的状态数据，即 setup 的返回值
+            setupState: null, // 组件自身的状态数据，即 setup 返回的对象
             isMounted: false, // 用来表示组件是否已经被挂载，初始值为 false
             subTree: null, // 组件所渲染的内容，即子树 (subTree)
             update: null, // 更新函数
             render: null, // 组件渲染函数
-            proxy: null, // 组件代理对象
+            proxy: null, // render 函数中的 this 代理对象
         }
         // 将组件实例设置到 vnode 上，用于后续更新
         vnode.component = instance
@@ -53,10 +53,10 @@ function createRenderer(options) {
         const setupResult = setup()
         if(typeof setupResult === 'object') {
             // 如果组件的 setup 方法返回的是一个对象，则通过 proxyRefs 方法处理之后设置到 instance 的 setupState 属性上
-            // proxyRefs 转换 ref 类型省去 .value 繁琐操作
+            // proxyRefs 函数主要是为了转换 ref 类型省去 .value 繁琐操作
             instance.setupState = proxyRefs(setupResult)
         } else {
-            // 返回的值还有可能是函数，这里不作展开分析了
+            // 返回的值还有可能是函数，如果是函数则作为组件的渲染函数，这里不作展开分析了
         }
         // 设置 render 函数中的 this 代理对象，通过 call 方法设置 render 函数中的 this 指向此 Proxy 代理对象
         instance.proxy = new Proxy({ _:instance }, {
@@ -78,7 +78,7 @@ function createRenderer(options) {
                 const subTree = (instance.subTree = instance.render.call(instance.proxy))
                 // 把虚拟DOM 渲染到对应的节点上
                 patch(null, subTree, container)
-                // 把生成的真实DOM 设置到虚拟DOM 的真实DOM 属性 el 上，后续如果没有变化，则不需要再次生成
+                // 把生成的真实DOM 设置到 vnode 的 el 上，后续如果没有变化，则不需要再次生成
                 instance.vnode.el = subTree.el
                 // 表示组件挂载完成
                 instance.isMounted = true
