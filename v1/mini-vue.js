@@ -12,7 +12,7 @@ function createRenderer(options) {
     function render(vnode, container) {
         patch(null, vnode, container, null, null)
     }
-    // 补丁函数
+    // 补丁函数， n1 旧虚拟DOM, n2 新虚拟DOM，container 渲染的节点
     function patch(n1, n2, container) {
         const { type } = n2
         if(typeof type === 'string') {
