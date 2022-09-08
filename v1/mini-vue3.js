@@ -99,8 +99,8 @@ function createRenderer(options) {
         } else if(Array.isArray(children)) {
             // 如果是子节点是数组则进行循环创建
             children.forEach((v) => {
-                // 递归调用 patch 函数渲染子节点
-                patch(null, v, container)
+                // 递归调用 patch 函数渲染子节点，使用上面新创建的当前元素 el 作为挂载点
+                patch(null, v, el)
             })
         }
         // 将元素插入到挂载点下
