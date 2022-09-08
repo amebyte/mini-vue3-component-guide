@@ -114,19 +114,14 @@ function createRenderer(options) {
             // 如果 children 是字符串，则说明它是元素的文本节点
             hostSetElementText(el, children)
         } else if(Array.isArray(children)) {
-            // 子节点是数组，那么调用 mountChildren 进行创建
-            mountChildren(children, container, parentComponent)
+            // 如果是子节点是数组则进行循环创建
+            children.forEach((v) => {
+                // 递归调用 patch 函数渲染子节点
+                patch(null, v, container, parentComponent)
+            })
         }
         // 将元素插入到挂载点下
         hostInsert(el, container)
-    }
-    // 循环创建子节点
-    function mountChildren(children, container, parentComponent) {
-        // 如果是子节点是数组则进行循环创建
-        children.forEach((v) => {
-          // 递归调用 patch 函数渲染子节点
-          patch(null, v, container, parentComponent)
-        })
     }
     // 返回渲染器对象
     return {

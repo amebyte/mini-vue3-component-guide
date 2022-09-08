@@ -41,7 +41,7 @@ function createRenderer(options) {
         const setupResult = setup()
         // 通过组件的实例的 render 函数生成子树，通过 call 方法设置 render 函数中的 this 指向组件 setup 返回的结果，让 render 函数能够访问组件自身的状态数据
         const subTree = render.call(setupResult)
-        // 把虚拟DOM 渲染到对应的节点上
+        // 调用 patch 把虚拟DOM 渲染成真实DOM
         patch(null, subTree, container)
     }
     // 具体怎么把虚拟DOM 渲染成真实DOM 
@@ -53,6 +53,12 @@ function createRenderer(options) {
         if(typeof children === 'string') {
             // 如果 children 是字符串，则说明它是元素的文本节点
             hostSetElementText(el, children)
+        } else if(Array.isArray(children)) {
+            // 如果是子节点是数组则进行循环创建
+            children.forEach((v) => {
+                // 递归调用 patch 函数渲染子节点
+                patch(null, v, container)
+            })
         }
         // 将元素插入到挂载点下
         hostInsert(el, container)
