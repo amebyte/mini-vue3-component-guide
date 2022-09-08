@@ -35,10 +35,11 @@ function createRenderer(options) {
     }
     // 组件挂载
     function mountComponent(vnode, container) {
+        // 获取组件的 setup、render 方法
         const { setup, render } = vnode.type 
         // 运行组件对象的 setup 方法，获取返回结果
         const setupResult = setup()
-        // 通过组件的实例的 render 函数生成子树
+        // 通过组件的实例的 render 函数生成子树，通过 call 方法设置 render 函数中的 this 指向组件 setup 返回的结果，让 render 函数能够访问组件自身的状态数据
         const subTree = render.call(setupResult)
         // 把虚拟DOM 渲染到对应的节点上
         patch(null, subTree, container)
