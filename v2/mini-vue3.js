@@ -64,7 +64,7 @@ function createRenderer(options) {
         setCurrentInstance(instance)
         // 运行组件对象的 setup 方法，获取返回结果
         const setupResult = setup()
-        // 设置当前组件当前组件实例为空, 具体场景是嵌套循环渲染的时候，渲染完子组件，再去渲染父组件
+        // 设置当前组件当前组件实例为空
         setCurrentInstance(null)
 
         if(typeof setupResult === 'object') {
@@ -218,7 +218,7 @@ const renderer = createRenderer({
     insert,
     setElementText
 })
-
+// 创建 Vue3 应用
 export function createApp(...args) {
     return renderer.createApp(...args)
 }
