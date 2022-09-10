@@ -9,22 +9,8 @@
             import { createApp } from './mini-vue3.js';
             import { App } from './App.js';
             import { RouterView } from './router-view.js';
-            RouterView.install = app => app.component('RouterView', RouterView)
-            const components = [
-                RouterView
-            ]
-            const INSTALLED_KEY = Symbol('INSTALLED_KEY')
-            const Element = {
-                // RouterView,
-                install(app) {
-                    if (app[INSTALLED_KEY]) return;
-                    app[INSTALLED_KEY] = true;
-                    components.forEach((c) => app.use(c));
-                }
-            }
             const app = createApp(App)
-            // app.component('RouterView', RouterView)
-            app.use(Element)
+            app.component('RouterView', RouterView)
             app.mount(document.querySelector("#app"));
         </script>
     </body>

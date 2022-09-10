@@ -156,8 +156,26 @@ function createAppAPI(render) {
     return function createApp(rootComponent) {
         // 创建应用实例的上下文对象
         const context = createAppContext()
+        // 插件注册池
+        const installedPlugins = new Set()
         // 创建 Vue3 应用实例对象
         const app = (context.app = {
+            // 注册插件方法
+            use(plugin, ...options) {
+                if (installedPlugins.has(plugin)) {
+                  // 已经注册过的插件不运行再进行注册
+                  console.warn(`Plugin has already been applied to target app.`)
+                } else if (plugin && typeof plugin.install === 'function') {
+                  // 如果插件对象的 install 属性是一个函数，那么就通过调用插件对象的 install 方法进行插件注册
+                  installedPlugins.add(plugin)
+                  plugin.install(app, ...options)
+                } else if (typeof plugin === 'function') {
+                  // 如果插件对象本身是一个函数，那么就直接执行插件本身进行插件注册
+                  installedPlugins.add(plugin)
+                  plugin(app, ...options)
+                }
+                return app
+            },
             // 注册全局组件方法
             component(name, component) {
                 if (!component) {
