@@ -7,6 +7,7 @@ export function resolveComponent(name) {
 }
 
 function resolveAsset(type, name) {
+    // 获取当前组件的实例对象
     const instance = currentRenderingInstance || currentInstance
     if (instance) {
       const Component = instance.type
@@ -25,7 +26,7 @@ function resolveAsset(type, name) {
       return res
     }
 }
-
+// 获取组件对象
 function resolve(registry, name) {
     return (
       registry &&
