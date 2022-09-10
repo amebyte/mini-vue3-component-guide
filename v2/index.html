@@ -10,6 +10,7 @@
             import { App } from './App.js';
             import { RouterView } from './router-view.js';
             const app = createApp(App)
+            // 注册全局组件
             app.component('RouterView', RouterView)
             app.mount(document.querySelector("#app"));
         </script>
