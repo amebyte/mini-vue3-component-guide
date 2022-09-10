@@ -3,7 +3,7 @@ import { createVNode } from './vnode.js'
 export const Component = {
     name: 'Component',
     setup() {
-       const txt = ref('Component') 
+       const txt = ref('局部组件') 
        return {
         txt
        }

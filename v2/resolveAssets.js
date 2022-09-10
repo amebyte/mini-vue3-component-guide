@@ -1,4 +1,4 @@
-import { currentInstance, currentRenderingInstance } from './mini-vue.js'
+import { currentInstance, currentRenderingInstance } from './mini-vue3.js'
 
 const COMPONENTS = 'components'
 

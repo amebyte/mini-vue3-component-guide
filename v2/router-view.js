@@ -3,7 +3,7 @@ import { createVNode } from './vnode.js'
 export const RouterView = {
     name: 'RouterView',
     setup() {
-       const txt = ref('RouterView') 
+       const txt = ref('全局组件') 
        return {
         txt
        }
