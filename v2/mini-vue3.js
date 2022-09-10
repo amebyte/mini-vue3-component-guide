@@ -38,11 +38,11 @@ function createRenderer(options) {
             }
         }
     }
-    // 初始化一个组件的上下文内容
+    // 初始化一个组件的上下文对象
     const emptyAppContext = createAppContext()
     // 组件挂载
     function mountComponent(vnode, container, parent) {
-        // 组件上下文继承父组件的上下文或者虚拟DOM 的上下文，如果都不存在则创建一个空的上下文
+        // 组件的 appContext 继承父组件的 appContext 或者虚拟DOM 的 appContext，如果都不存在则创建一个空的上下文对象
         const appContext =
               (parent ? parent.appContext : vnode.appContext) || emptyAppContext
         // 定义组件实例，一个组件实例本质上就是一个对象，它包含与组件有关的状态信息
@@ -151,29 +151,38 @@ function setCurrentRenderingInstance(instance) {
     currentRenderingInstance = instance
     return prev
 }
-// 创建 Vue3 应用实例
+// 创建 Vue3 应用
 function createAppAPI(render) {
     return function createApp(rootComponent) {
+        // 创建应用实例的上下文对象
         const context = createAppContext()
+        // 插件注册池
         const installedPlugins = new Set()
-        // 创建 Vue3 应用实例
+        // 创建 Vue3 应用实例对象
         const app = (context.app = {
+            // 注册插件方法
             use(plugin, ...options) {
                 if (installedPlugins.has(plugin)) {
+                  // 已经注册过的插件不运行再进行注册
                   console.warn(`Plugin has already been applied to target app.`)
                 } else if (plugin && typeof plugin.install === 'function') {
+                  // 如果插件对象的 install 属性是一个函数，那么就通过调用插件对象的 install 方法进行插件注册
                   installedPlugins.add(plugin)
                   plugin.install(app, ...options)
                 } else if (typeof plugin === 'function') {
+                  // 如果插件对象本身是一个函数，那么就直接执行插件本身进行插件注册
                   installedPlugins.add(plugin)
                   plugin(app, ...options)
                 }
                 return app
             },
+            // 注册全局组件方法
             component(name, component) {
                 if (!component) {
+                  // 如果不存在 component 那么就是获取组件对象
                   return context.components[name]
                 }
+                // 把组件注册到 Vue3 应用实例上下文对象的 components 属性上
                 context.components[name] = component
                 return app
             },
@@ -181,6 +190,7 @@ function createAppAPI(render) {
             mount(rootContainer) {
                 // 创建根组件虚拟DOM
                 const vnode = createVNode(rootComponent)
+                // 把应用实例的上下文对象设置到根组件的虚拟DOM 的 appContext 属性上
                 vnode.appContext = context
                 // 把根组件的虚拟DOM 渲染到 #app 节点上
                 render(vnode, rootContainer)
@@ -189,7 +199,7 @@ function createAppAPI(render) {
         return app
     }
 }
-// 当前组件上下文对象，其中包含config，app等
+// 当前组件上下文对象，其中包含 config，app，components 等，而 components 则是我们这期重点要了解的
 function createAppContext() {
     return {
         app: null,

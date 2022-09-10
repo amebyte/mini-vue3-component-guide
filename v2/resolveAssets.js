@@ -20,9 +20,9 @@ function resolveAsset(type, name) {
         }
       }
       const res =
-      // 局部注册
+      // 获取局部注册的组件
       resolve(Component[type], name) ||
-      // 全局注册
+      // 获取全局注册的组件
       resolve(instance.appContext[type], name)
       return res
     }
