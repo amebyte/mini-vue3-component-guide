@@ -91,7 +91,6 @@ function createElement(type) {
 function insert(child, parent, anchor) {
     parent.insertBefore(child, anchor || null)
 }
-
 // 创建元素文本节点
 function setElementText (el, text) {
     el.textContent = text
